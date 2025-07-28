@@ -117,7 +117,7 @@ You must enable External Wallets and Solana in your Privy Dashboard
 
 You must add your app's Android package name to your *Clients* dashboard
 
-![App Identifiers Screenshot](/screenshots/app-identifiers.png)
+![App Identifiers Screenshot](/screenshots/app-identifier.png)
 
 ### Privy Client and App ID
 
