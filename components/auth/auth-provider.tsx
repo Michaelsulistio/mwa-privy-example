@@ -49,7 +49,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       // 1. Generate Privy SIWS message given user address
       const privySiwsMessage = await generateMessage({
         wallet: { address: mwaAccount.publicKey.toBase58()},
-        from: { domain: AppConfig.domain, uri: AppConfig.uri },
+        from: { domain: AppConfig.domain, uri: AppConfig.uri }, // Must match your Privy dashboard!!
       })
 
       // 2. Encode to Uint8Array
