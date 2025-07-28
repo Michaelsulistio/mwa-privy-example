@@ -1,10 +1,11 @@
-import { clusterApiUrl } from '@solana/web3.js'
 import { Cluster } from '@/components/cluster/cluster'
 import { ClusterNetwork } from '@/components/cluster/cluster-network'
+import { clusterApiUrl } from '@solana/web3.js'
 
 export class AppConfig {
-  static name = 'mwa-privy-example'
-  static uri = 'https://example.com'
+  static name = 'com.michaelsulistio.mwaprivyexample'
+  static uri = 'https://com.michaelsulistio.mwaprivyexample'
+  static domain = 'com.michaelsulistio.mwaprivyexample'
   static clusters: Cluster[] = [
     {
       id: 'solana:devnet',

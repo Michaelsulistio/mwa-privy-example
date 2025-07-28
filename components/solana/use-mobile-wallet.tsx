@@ -3,9 +3,11 @@ import { SignInPayload } from '@solana-mobile/mobile-wallet-adapter-protocol'
 import { Transaction, TransactionSignature, VersionedTransaction } from '@solana/web3.js'
 import { useCallback, useMemo } from 'react'
 import { Account, useAuthorization } from './use-authorization'
+import { useLoginWithSiws } from '@privy-io/expo'
 
 export function useMobileWallet() {
   const { authorizeSessionWithSignIn, authorizeSession, deauthorizeSessions } = useAuthorization()
+  const { generateMessage, login } = useLoginWithSiws();
 
   const connect = useCallback(async (): Promise<Account> => {
     return await transact(async (wallet) => {
@@ -13,7 +15,7 @@ export function useMobileWallet() {
     })
   }, [authorizeSession])
 
-  const signIn = useCallback(
+  const signIn = useCallback(       
     async (signInPayload: SignInPayload): Promise<Account> => {
       return await transact(async (wallet) => {
         return await authorizeSessionWithSignIn(wallet, signInPayload)
