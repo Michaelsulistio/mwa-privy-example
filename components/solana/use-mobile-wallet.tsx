@@ -25,6 +25,7 @@ export function useMobileWallet() {
     [authorizeSessionWithSignIn],
   )
 
+  // For when user has not connected to both MWA or Privy
   const privyMwaSignIn = useCallback(
     async (): Promise<{ mwaResult: Account; privyUser: PrivyUser }> => {
       return await transact(async (wallet) => {

@@ -55,15 +55,9 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { user } = usePrivy()
-  const { isAuthenticated } = useAuth()
-
-  const loggedInPrivyAndMWA = user && isAuthenticated
-
   return (
     <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="home-screen" />
     </Stack>
   )
 }
