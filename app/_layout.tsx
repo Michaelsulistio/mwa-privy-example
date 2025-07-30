@@ -10,6 +10,7 @@ import { View } from 'react-native'
 import { useTrackLocations } from '@/hooks/use-track-locations'
 import { AppSplashController } from '@/components/app-splash-controller'
 import { usePrivy } from '@privy-io/expo'
+import { useAuth } from '@/components/auth/auth-provider'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -55,16 +56,14 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { user } = usePrivy()
+  const { isAuthenticated } = useAuth()
+
+  const loggedInPrivyAndMWA = user && isAuthenticated
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={!!user}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="+not-found" />
-      </Stack.Protected>
-      <Stack.Protected guard={!user}>
-        <Stack.Screen name="sign-in" />
-      </Stack.Protected>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="home-screen" />
     </Stack>
   )
 }

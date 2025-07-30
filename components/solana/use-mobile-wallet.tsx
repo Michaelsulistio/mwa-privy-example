@@ -3,7 +3,8 @@ import { SignInPayload } from '@solana-mobile/mobile-wallet-adapter-protocol'
 import { Transaction, TransactionSignature, VersionedTransaction } from '@solana/web3.js'
 import { useCallback, useMemo } from 'react'
 import { Account, useAuthorization } from './use-authorization'
-import { useLoginWithSiws } from '@privy-io/expo'
+import { PrivyUser, useLoginWithSiws } from '@privy-io/expo'
+import { AppConfig } from '@/constants/app-config'
 
 export function useMobileWallet() {
   const { authorizeSessionWithSignIn, authorizeSession, deauthorizeSessions } = useAuthorization()
@@ -24,6 +25,36 @@ export function useMobileWallet() {
     [authorizeSessionWithSignIn],
   )
 
+  const privyMwaSignIn = useCallback(
+    async (): Promise<{ mwaResult: Account; privyUser: PrivyUser }> => {
+      return await transact(async (wallet) => {
+        const authResult = await authorizeSession(wallet)
+
+        console.log("Fetching privy siws message")
+        const privySiwsMessage = await generateMessage({
+          wallet: { address: authResult.publicKey.toBase58()},
+          from: { domain: AppConfig.domain, uri: AppConfig.uri },
+        })
+
+        const encodedPrivySiwsMessage = new TextEncoder().encode(privySiwsMessage.message);
+        console.log("Waiting for sign message")
+        const [signatureBytes] = await wallet.signMessages({addresses: [authResult.address], payloads: [encodedPrivySiwsMessage]})
+        const signatureBase64 = Buffer.from(signatureBytes).toString('base64');
+
+        console.log("Logging in with Privy SIWS")
+        const user = await login({
+          signature: signatureBase64,
+          message: privySiwsMessage.message,
+          disableSignup: false,
+        });
+        console.log("Sign in with Privy success")
+
+        return {mwaResult: authResult, privyUser: user}
+      })
+    },
+    [authorizeSessionWithSignIn],
+  )
+  
   const disconnect = useCallback(async (): Promise<void> => {
     await deauthorizeSessions()
   }, [deauthorizeSessions])
@@ -60,10 +91,11 @@ export function useMobileWallet() {
     () => ({
       connect,
       signIn,
+      privyMwaSignIn,
       disconnect,
       signAndSendTransaction,
       signMessage,
     }),
-    [connect, disconnect, signAndSendTransaction, signIn, signMessage],
+    [connect, disconnect, signAndSendTransaction, signIn, privyMwaSignIn, signMessage],
   )
 }
