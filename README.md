@@ -12,82 +12,56 @@ Your app can use Mobile Wallet Adapter + Privy SDK to login/sign-up for Privy vi
 
 ### Steps
 
-1. Connect to an external wallet app (e.g Seed Vault Wallet, Solflare, Phantom) with Mobile Wallet Adapter.
+First, make sure you're using these versions of Mobile Wallet Adapter:
 
-```typescript
-const connect = useCallback(async (): Promise<Account> => {
+```
+"@solana-mobile/mobile-wallet-adapter-protocol": "2.2.2-hotfix.0"
+"@solana-mobile/mobile-wallet-adapter-protocol-web3js": "2.2.2"
+```
+
+Below is an example of SIWS using Mobile Wallet Adapter (reference: `useMobileWallet`).
+
+```ts
+import { transact } from '@solana-mobile/mobile-wallet-adapter-protocol-web3js'
+
+const privyMwaSignIn = async (): Promise<{ mwaResult: Account; privyUser: PrivyUser }> => {
+   // 1. Start an MWA transact Session and user chooses a wallet
    return await transact(async (wallet) => {
-      return await authorizeSession(wallet)
+      // 2. Authorize/Connect to the wallet
+      const authResult = await authorizeSession(wallet)
+
+      // 3. Generate a Sign-In With Solana (SIWS) message for Privy authentication
+      const privySiwsMessage = await generateMessage({
+         wallet: { address: authResult.publicKey.toBase58()},
+         from: { domain: AppConfig.domain, uri: AppConfig.uri },
+      })
+
+      // 4. Encode the SIWS message to `Uint8Array` for signing
+      const encodedPrivySiwsMessage = new TextEncoder().encode(privySiwsMessage.message);
+
+      // 5. Request user to sign the SIWS message with their wallet
+      const [signatureBytes] = await wallet.signMessages({addresses: [authResult.address],   payloads: [encodedPrivySiwsMessage]})
+      const signatureBase64 = Buffer.from(signatureBytes).toString('base64');
+
+      // 6. Authenticate with Privy using the signed message
+      const user = await login({
+         signature: signatureBase64,
+         message: privySiwsMessage.message,
+         disableSignup: false,
+      });
+
+      // 7. Return both the MWA session result and the authenticated Privy user
+      return {mwaResult: authResult, privyUser: user}
    })
-}, [authorizeSession])
+}
 ```
 
-- [Code Snippet](https://github.com/Michaelsulistio/mwa-privy-example/blob/main/components/solana/use-mobile-wallet.tsx#L12)
-
-2. Now you have the connected user address, generate a SIWS Message via Privy SDK (e.g `generateMessage(userAddress)`).
-
-```typescript
-// Generate Privy SIWS message given user address
-const privySiwsMessage = await generateMessage({
-   wallet: { address: mwaAccount.publicKey.toBase58()},
-   from: { domain: AppConfig.domain, uri: AppConfig.uri }, // Must match your Privy dashboard!!
-})
-```
-
-- [Code Snippet](https://github.com/Michaelsulistio/mwa-privy-example/blob/main/components/auth/auth-provider.tsx#L50)
-
-3. Encode the message to Uint8Array so it can be used by MWA message signing
-
-```typescript
-// 2. Encode to Uint8Array
-const encodedPrivySiwsMessage = new TextEncoder().encode(privySiwsMessage.message);
-```
-
-- [Code Snippet](https://github.com/Michaelsulistio/mwa-privy-example/blob/main/components/auth/auth-provider.tsx#L55)
-
-4. Invoke MWA's `signMessages(encodedPrivySiwsMessage)` method and passes the encoded SIWS Message for signing.
-
-```typescript
-// Connect and Sign SIWS Message
-const [signatureBytes] = await transact(async (wallet: Web3MobileWallet) => {
-   const authResult = await authorizeSession(wallet);
-   if (authResult.publicKey.toBase58() !== mwaAccount.publicKey.toBase58()) {
-      throw new Error("Connected wallet address does not match the provided user address.");
-   }
-
-   return await wallet.signMessages({addresses: [authResult.address], payloads: [encodedPrivySiwsMessage]})
-})
-```
-
-- [Code Snippet](https://github.com/Michaelsulistio/mwa-privy-example/blob/main/components/auth/auth-provider.tsx#L60)
-
-5. Convert the signed message from Uint8Array to a Base64 encoded string
-
-```typescript
-const signatureBase64 = Buffer.from(signatureBytes).toString('base64');
-```
-
-- [Code Snippet](https://github.com/Michaelsulistio/mwa-privy-example/blob/main/components/auth/auth-provider.tsx#L70)
-
-6. Invoke Privy SDK `login(signedMessage)` to login or sign-up. If user doesn't have an account, it creates an account for them (if `disableSignup: false`)
-
-```typescript
-// Login or Signup to Privy
-const user = await login({
-   signature: signatureBase64,
-   message: privySiwsMessage.message,
-   disableSignup: false,
-});
-```
-
-- [Code Snippet](https://github.com/Michaelsulistio/mwa-privy-example/blob/main/components/auth/auth-provider.tsx#L73)
-
-7. If successful, at this point, you use Privy throughout your app
+If successful, at this point, you use can `usePrivy` in your app.
 
 ```typescript
 const { user } = usePrivy();
 
-console.log(user) // Should be populated if successful
+console.log(user) // Should be populated if `login` was successful
 ```
 
 ## Required Privy Configuration
