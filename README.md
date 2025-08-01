@@ -4,20 +4,31 @@ This is a proof-of-concept of an Expo app using [Mobile Wallet Adapter (MWA)](ht
 
 This is an **Android** only implementation, as MWA is only compatible on Android.
 
+## Screenshots
+
+<p align="center">
+  <img src="/screenshots/screenshot1.png" alt="Mobile app screenshot 1" width="300" />
+  <img src="/screenshots/screenshot2.png" alt="Mobile app screenshot 2" width="300" />
+</p>
+
 ## How it works
 
 The key concept is that Privy provides a [Sign-In-With-Solana (SIWS) authentication method](https://docs.privy.io/authentication/user-authentication/login-methods/wallet#solana-siws) for external wallets to login or sign-up for Privy accounts.
 
 Your app can use Mobile Wallet Adapter + Privy SDK to login/sign-up for Privy via this SIWS method.
 
-### Steps
+## Steps
 
-First, make sure you're using these versions of Mobile Wallet Adapter:
+### Prerequisites
+
+Use these versions of Mobile Wallet Adapter:
 
 ```
 "@solana-mobile/mobile-wallet-adapter-protocol": "2.2.2-hotfix.0"
 "@solana-mobile/mobile-wallet-adapter-protocol-web3js": "2.2.2"
 ```
+
+### Code
 
 Below is an example of SIWS using Mobile Wallet Adapter (reference: `useMobileWallet`).
 
