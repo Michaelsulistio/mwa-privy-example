@@ -28,6 +28,13 @@ Use these versions of Mobile Wallet Adapter:
 "@solana-mobile/mobile-wallet-adapter-protocol-web3js": "2.2.2"
 ```
 
+Setup your Privy app and add your `appId` and `clientId` in a `.env` file:
+
+```
+EXPO_PUBLIC_PRIVY_CLIENT_ID=...
+EXPO_PUBLIC_PRIVY_APP_ID=...
+```
+
 ### Code
 
 Below is an example of SIWS using Mobile Wallet Adapter (reference: `useMobileWallet`).
