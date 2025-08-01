@@ -62,6 +62,7 @@ const privyMwaSignIn = async (): Promise<{ mwaResult: Account; privyUser: PrivyU
       const signatureBase64 = Buffer.from(signatureBytes).toString('base64');
 
       // 6. Authenticate with Privy using the signed message
+      // If first time logging in, this will sign up a new user account.
       const user = await login({
          signature: signatureBase64,
          message: privySiwsMessage.message,
